@@ -3,7 +3,7 @@ var app = express()
 var port = process.env.PORT || 5000
 
 require('./app_api/models/db')
-var productRouter = require('./app_api/routes/products')
+var productRouter = require('./app_api/routes/product')
 app.use('/api',productRouter)
 
 
