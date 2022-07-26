@@ -23,6 +23,6 @@ mongoose.connection.on('disconnected', () =>{
 })
 
 
-require('./products');
+require('./product');
 
 
