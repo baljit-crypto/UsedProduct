@@ -1,13 +1,13 @@
 var express = require("express")
 var app = express()
-var server_port = process.env.PORT || 5000;
+var port = process.env.PORT || 5000;
 
 
 app.use('/',function(){
 })
 
 
-app.listen(server_port,() =>{
+app.listen(port,() =>{
         console.log(`listening to port ${port}`)
 })
 
