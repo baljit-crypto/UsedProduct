@@ -47,7 +47,9 @@ const createProduct = function(req,res){
       name:req.body.name,
       price:req.body.price,
       img:req.body.img,
-      description:req.body.description
+      description:req.body.description,
+      seller:req.body.seller,
+      available:req.body.available
   },(err,data) => {
     if(err){
         if(err){
@@ -93,6 +95,8 @@ const updateProduct = function(req,res){
             data.price = req.body.price;
             data.img = req.body.img;
             data.description = req.body.description;
+            data.seller = req.body.seller;
+            data.available = req.body.available;
             data.save((err, data) => {
                 if(err){
                     res
