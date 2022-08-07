@@ -59,7 +59,7 @@ const createUser = function(req,res){
 };
 
 const getProfile = (req,res) => {
-        
+        res.json("profile")
 }   
 
 const updateUser = function(req,res){ 
