@@ -1,18 +1,25 @@
 var express = require('express');
 var router = express.Router();
-var signupValidation = require('./validation')
+const {validateToken} = require("../jwt")
 
 const ctrlUser = require("../controllers/user");
 
+
 router
-.route('/user')
-.get(ctrlUser.getUserList)
+.route('/profile',validateToken)
+.get(ctrlUser.getProfile)
+
+router
+.route('/signin')
+.post(ctrlUser.signinUser)
+
+router
+.route('/signup')
 .post(ctrlUser.createUser)
 
 
 router
 .route('/user/:userid')
-.get(ctrlUser.getSingleUser)
 .put(ctrlUser.updateUser)
 .delete(ctrlUser.deleteUser)
 

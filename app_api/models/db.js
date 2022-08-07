@@ -25,5 +25,3 @@ mongoose.connection.on('disconnected', () =>{
 
 require('./product');
 require('./user');
-
-

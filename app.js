@@ -1,15 +1,19 @@
 var express = require("express")
 var cors = require('cors')
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
 var app = express()
+require('dotenv').config()
 var port = process.env.PORT || 5000
+
+ 
+// app.use(bodyParser.urlencoded({
+//     extended: true
+// }))
+// app.use(bodyParser.json())
+
 app.use(express.json())
- 
-app.use(bodyParser.json())
- 
-app.use(bodyParser.urlencoded({
-    extended: true
-}))
+ app.use(cookieParser())
 require('./app_api/models/db')
 
 app.use(cors())

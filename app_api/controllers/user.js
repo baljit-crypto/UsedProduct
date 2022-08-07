@@ -1,69 +1,61 @@
-const mongoose = require('mongoose');
-const  user = mongoose.model('user');
+const mongoose = require('mongoose')
+const  user = mongoose.model('user')
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
+const brcypt = require("bcrypt")
+const {createToken} = require("../jwt")
 
-const getUserList = function(req,res){
-    user.find().exec(function(err,data){
-        if(err){
-            res
-            .status(404)
-            .json(err)
-          return;  
+
+
+const signinUser =async function(req,res){
+    const {email,password} = req.body
+    const User = await user.findOne({where: {email: email}})
+    if(!User) res.status(400).json({error:"User doesn't exist"})
+    const dbPassword = User.password
+    brcypt.compare(password,dbPassword).then((match) => {
+        if(!match){
+            res.status(400)
+            .json({error:"wrong username and password combinations"})
+        }else{
+            const access_token = createToken(User)
+            res.cookie("access-token",access_token,{
+                maxAge: 60*60*24*30*1000,
+                httpOnly: true
+            })
+            res.status(200).json(User)
+
         }
-        res
-        .status(200)
-        .json(data)
-    });
-
-};
-
-const getSingleUser = function(req,res){
-    if(!req.params.userid){
-        res
-        .status(404)
-        .json({
-         "message":"Not Found, userid is required"
-     })
-     return;
-    }
-    user
-    .findById(req.params.userid)
-    .exec((err,data) => {
-     if(err){
-         res
-         .status(404)
-         .json(err)
-       return;  
-     }
-     else{
-     res
-     .status(200)
-     .json(data)
-    } 
-    });
-}
+    })
+   
+  };
 
 const createUser = function(req,res){
-  user.create({
-      username:req.body.username,
-      email:req.body.email,
-      phone: req.body.phone,
-      password: req.body.password
-  },(err,data) => {
-    if(err){
-        if(err){
+    const {username,email,phone,password} = req.body
+    brcypt.hash(password,10).then((hash) => {
+        user.create({username: username,
+            email: email,
+            phone: phone,
+            password: hash},(err,data) => {
+            if(err){
+                res
+                .status(404)
+                .json(err)
+              return;  
+            }
+            else{
             res
-            .status(404)
-            .json(err)
-          return;  
-        }
-        else{
-        res
-        .status(200)
-        .json(data)
-        }
-    }
-  })
+            .status(200)
+            .json(data)
+            }
+        
+      })
+    })
+
 };
+
+const getProfile = (req,res) => {
+        
+}   
 
 const updateUser = function(req,res){ 
     if(!req.params.userid){
@@ -133,9 +125,9 @@ const deleteUser = function(req,res){
 
 
 module.exports = {
-   getUserList,
-   getSingleUser,
    createUser,
    updateUser,
-   deleteUser
+   deleteUser,
+   signinUser,
+   getProfile
 };
