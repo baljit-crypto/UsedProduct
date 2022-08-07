@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const  user = mongoose.model('user')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
-const brcypt = require("bcrypt")
+const brcypt = require("bcryptjs")
 const {createToken} = require("../jwt")
 
 
@@ -31,25 +31,30 @@ const signinUser =async function(req,res){
 
 const createUser = function(req,res){
     const {username,email,phone,password} = req.body
-    brcypt.hash(password,10).then((hash) => {
-        user.create({username: username,
-            email: email,
-            phone: phone,
-            password: hash},(err,data) => {
-            if(err){
-                res
-                .status(404)
-                .json(err)
-              return;  
-            }
-            else{
-            res
-            .status(200)
-            .json(data)
-            }
-        
-      })
-    })
+    // brcypt.hash(password,10).then((hash) => {
+        brcypt.genSalt(10,function(err,salt){
+            brcypt.hash(password,salt,function(err,hash){
+                user.create({username: username,
+                    email: email,
+                    phone: phone,
+                    password: hash},(err,data) => {
+                    if(err){
+                        res
+                        .status(404)
+                        .json(err)
+                      return;  
+                    }
+                    else{
+                    res
+                    .status(200)
+                    .json(data)
+                    }
+                
+              })
+            })
+        })
+       
+    // })
 
 };
 
