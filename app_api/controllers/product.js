@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
-const  Products = mongoose.model('products');
+const Products = mongoose.model('products');
+const Wishlist = mongoose.model('wishlist')
 
 const getProductList = function(req,res){
-    Products.find().exec(function(err,data){
+    Products.find({ category: req.query.category }).exec(function(err,data){
         if(err){
             res
             .status(404)
@@ -13,7 +14,6 @@ const getProductList = function(req,res){
         .status(200)
         .json(data)
     });
-
 };
 
 const getSingleProduct = function(req,res){
@@ -21,8 +21,8 @@ const getSingleProduct = function(req,res){
         res
         .status(404)
         .json({
-         "message":"Not Found, productid is required"
-     })
+            "message":"Not Found, productid is required"
+        })
      return;
     }
     Products
@@ -35,29 +35,57 @@ const getSingleProduct = function(req,res){
        return;  
      }
      else{
-     res
-     .status(200)
-     .json(data)
-    } 
+
+        let wished = false;
+        if (req.query.user_id){
+            Wishlist.findOne({ user_id: req.query.user_id, product_id: req.params.productid }, function(err,result) { 
+                if (result){
+                    wished = true;
+                }
+                
+                res
+                .status(200)
+                .json({
+                    ...data._doc,
+                    ...{ wished: wished }
+                })
+            })
+        }else{
+            res
+            .status(200)
+            .json({
+                ...data._doc,
+                ...{ wished: wished }
+            })
+    
+        }
+
+    }   
     });
 }
 
 const createProduct = function(req,res){
   Products.create({
-      name:req.body.name,
-      price:req.body.price,
-      img:req.body.img,
-      description:req.body.description,
-      seller:req.body.seller,
-      available:req.body.available
-  },(err,data) => {
+        name:req.body.name,
+        category:req.body.category,
+        price:req.body.price,
+        images: req.files.images.map(f => ({ src: f.filename })),
+        description:req.body.description,
+        seller:req.body.seller,
+        available:req.body.available
+    },(err,data) => {
+    if(err){
         if(err){
             res
             .status(404)
             .json(err)
           return;  
-        }
-        else{
+        } else{
+            res
+            .status(200)
+            .json(data)
+            }
+    } else {
         res
         .status(200)
         .json(data)
@@ -90,10 +118,49 @@ const updateProduct = function(req,res){
                 return;
             }
             data.name = req.body.name;
+            data.category = req.body.category;
             data.price = req.body.price;
-            data.img = req.body.img;
             data.description = req.body.description;
-            data.seller = req.body.seller;
+
+            data.save((err, data) => {
+                if(err){
+                    res
+                    .status(404)
+                    .json(err)
+                }
+                else{
+                    res
+                    .status(200)
+                    .json(data);
+                }
+            })
+        })
+};
+
+const updateProductAvailability = function(req,res){ 
+    if(!req.params.productid){
+        res
+        .status(404)
+        .json({
+            "message":"Not Found, productid is required"
+        });
+      return;  
+    }
+    Products.findById(req.params.productid)
+        .exec((err,data) => {
+            if(!data){
+                res
+                .status(404)
+                .json({
+                    "message":"productid not found"
+                })
+                return;
+            }else if(err){
+                res
+                .status(400)
+                .json(err)
+                return;
+            }
             data.available = req.body.available;
             data.save((err, data) => {
                 if(err){
@@ -139,5 +206,6 @@ module.exports = {
    getSingleProduct,
    createProduct,
    updateProduct,
+   updateProductAvailability,
    deleteProduct
 };

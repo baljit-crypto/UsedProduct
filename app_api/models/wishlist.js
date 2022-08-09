@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const wishlistSchema = new mongoose.Schema({
-            wish_product:{
-                type: String,
-                required: true
-             },
             createdAt : {
                  type : Date, 
                  default: () => Date.now() 

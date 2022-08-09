@@ -6,10 +6,11 @@ const ctrlWishlist = require("../controllers/wishlist");
 
 router
 .route('/wishlist')
+.get(validateToken, ctrlWishlist.getWishlist)
 .post(ctrlWishlist.createWishlist)
 
 router
-.route('/wishlist/:wishlistid')
+.route('/wishlist/:productid')
 .delete(ctrlWishlist.deleteWishlist)
 
 module.exports = router;

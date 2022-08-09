@@ -9,18 +9,19 @@ const createToken = (user) => {
 
 
 const validateToken = async (req,res,next) => {
-    const accessToken = req.cookies["access-token"]
-    if(!accessToken) return res.status(400).json({error:"User not Authenticated"})
+    const authHeader = req.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")){
+        return res.status(400).json({error:"User not Authenticated"})
+    }
+    const accessToken = authHeader.substring(7, authHeader.length);
     try{
         const valid_token = verify(accessToken,process.env.JWT_ACCESS_SECRET)
         if(valid_token){
             req.authenticated = true
-            const User = await user.findOne({where: {_id: valid_token._id}})
-            console.log(accessToken)
+            req.user_id = valid_token._id
             return next()
         }
     }catch(err){
-        console.log("not authenticated")
         return res.status(400).json({error: err})
     }
 }

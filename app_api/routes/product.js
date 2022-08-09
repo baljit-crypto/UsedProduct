@@ -15,4 +15,8 @@ router
 .put(ctrlProduct.updateProduct)
 .delete(ctrlProduct.deleteProduct)
 
+router
+.route('/product/:productid/available')
+.put(ctrlProduct.updateProductAvailability)
+
 module.exports = router;
