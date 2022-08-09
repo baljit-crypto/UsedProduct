@@ -13,7 +13,7 @@ const signinUser =async function(req,res){
     if(!User) res.status(400).json({error:"User doesn't exist"})
     const dbPassword = User.password
     brcypt.compare(password,dbPassword).then((match) => {
-        if(!match){
+        if(match === true){
             res.status(400)
             .json({error:"wrong username and password combinations"})
         }else{
