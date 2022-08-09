@@ -20,10 +20,12 @@ app.use(cors())
 var productRouter = require('./app_api/routes/product')
 var userRouter = require('./app_api/routes/user')
 var wishlistRouter = require('./app_api/routes/wishlist')
+var myproductRouter = require('./app_api/routes/myItems')
 
 app.use('/api',productRouter)
 app.use('/api',userRouter)
 app.use('/api',wishlistRouter)
+app.use('/api',myproductRouter)
 
 app.listen(port,() =>{
         console.log(`listening to port ${port}`)

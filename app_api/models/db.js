@@ -26,3 +26,4 @@ mongoose.connection.on('disconnected', () =>{
 require('./product')
 require('./user')
 require('./wishlist')
+require('./myItems')

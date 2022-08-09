@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const  Products = mongoose.model('products');
+const  myItems = mongoose.model('myItems');
 
-const getProductList = function(req,res){
-    Products.find().exec(function(err,data){
+const getMyItemsList = function(req,res){
+    myItems.find().exec(function(err,data){
         if(err){
             res
             .status(404)
@@ -16,17 +16,17 @@ const getProductList = function(req,res){
 
 };
 
-const getSingleProduct = function(req,res){
-    if(!req.params.productid){
+const getSingleMyItem = function(req,res){
+    if(!req.params.myItemsid){
         res
         .status(404)
         .json({
-         "message":"Not Found, productid is required"
+         "message":"Not Found, myItemsid is required"
      })
      return;
     }
-    Products
-    .findById(req.params.productid)
+    myItems
+    .findById(req.params.myItemsid)
     .exec((err,data) => {
      if(err){
          res
@@ -42,8 +42,8 @@ const getSingleProduct = function(req,res){
     });
 }
 
-const createProduct = function(req,res){
-  Products.create({
+const createMyItem = function(req,res){
+  myItems.create({
       name:req.body.name,
       price:req.body.price,
       img:req.body.img,
@@ -65,22 +65,22 @@ const createProduct = function(req,res){
   })
 };
 
-const updateProduct = function(req,res){ 
-    if(!req.params.productid){
+const updateMyItem = function(req,res){ 
+    if(!req.params.myItemsid){
         res
         .status(404)
         .json({
-            "message":"Not Found, productid is required"
+            "message":"Not Found, myItemsid is required"
         });
       return;  
     }
-    Products.findById(req.params.productid)
+    myItems.findById(req.params.myItemsid)
         .exec((err,data) => {
             if(!data){
                 res
                 .status(404)
                 .json({
-                    "message":"productid not found"
+                    "message":"myItemsid not found"
                 })
                 return;
             }else if(err){
@@ -110,11 +110,11 @@ const updateProduct = function(req,res){
         })
 };
 
-const deleteProduct = function(req,res){
-    const productid = req.params.productid;
-    if(productid){
-        Products
-        .findByIdAndRemove(productid)
+const deleteMyItem = function(req,res){
+    const myItemsid = req.params.myItemsid;
+    if(myItemsid){
+        myItems
+        .findByIdAndRemove(myItemsid)
         .exec((err,data) => {
             if(err){
                 res
@@ -129,15 +129,15 @@ const deleteProduct = function(req,res){
     } else{
         res
         .status(404)
-        .json({"message":"No productid"});
+        .json({"message":"No myItemsid"});
     }
 };
 
 
 module.exports = {
-   getProductList,
-   getSingleProduct,
-   createProduct,
-   updateProduct,
-   deleteProduct
+   getMyItemsList,
+   getSingleMyItem,
+   createMyItem,
+   updateMyItem,
+   deleteMyItem
 };

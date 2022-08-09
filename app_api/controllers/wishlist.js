@@ -3,7 +3,7 @@ const  wishlist = mongoose.model('wishlist')
 
 
 const createWishlist = function(req,res){
-    const {wish_product,createdAt,user_id,product_id} = req.body
+    const {wish_product,createdAt,user_id,product_id} = req.body 
                 wishlist.create({wish_product: wish_product,
                     createdAt: createdAt,
                     user_id: user_id,
