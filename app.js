@@ -4,7 +4,6 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 var app = express()
 var path = require('path');
-var mime = require('mime');
 require('dotenv').config()
 var port = process.env.PORT || 5000
 
@@ -31,24 +30,50 @@ app.use('/api',wishlistRouter)
 app.use('/api',myproductRouter)
 
 /* Image upload  */
+// const multer  = require('multer')
+// var storage = multer.diskStorage({
+//         destination: function (req, file, cb) {
+//           cb(null, './uploads/')
+//         },
+//         filename: function (req, file, cb) {
+//                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+//                 cb(null, uniqueSuffix + '.' + mime.getExtension(file.mimetype));
+//         }
+//       });
+// var upload = multer({ storage: storage }).fields([{ name: 'images' }])
+// app.post('/api/product', function (req, res) {
+//         upload(req, res, function (err) {
+//                 if (err instanceof multer.MulterError) {
+//                         // console.log("A Multer error occurred when uploading.", err);
+//                 } else if (err) {
+//                         // console.log("An unknown error occurred when uploading.", err);
+//                 }else {
+//                         // console.log("Everything went fine");
+//                         const ctrlProduct = require("./app_api/controllers/product");
+//                         ctrlProduct.createProduct(req, res);
+//                 }
+//         })
+// })
+
+/* AWS S3 */
+
 const multer  = require('multer')
-var storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-          cb(null, './uploads/')
-        },
-        filename: function (req, file, cb) {
-                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-                cb(null, uniqueSuffix + '.' + mime.getExtension(file.mimetype));
-        }
-      });
-var upload = multer({ storage: storage }).fields([{ name: 'images' }])
+var upload = multer({ dest: 'temp/', limits: { fileSize: 1 * 1024 * 1024 } }).fields([{ name: 'images' }])
 app.post('/api/product', function (req, res) {
         upload(req, res, function (err) {
                 if (err instanceof multer.MulterError) {
-                        // console.log("A Multer error occurred when uploading.", err);
+                        console.log("A Multer error occurred when uploading.", err);
+                        res
+                        .status(500)
+                        .json({ error: err })
+                        return;  
                 } else if (err) {
-                        // console.log("An unknown error occurred when uploading.", err);
-                }else {
+                        console.log("An unknown error occurred when uploading.", err);
+                        res
+                        .status(500)
+                        .json({ error: err })
+                        return;  
+                } else {
                         // console.log("Everything went fine");
                         const ctrlProduct = require("./app_api/controllers/product");
                         ctrlProduct.createProduct(req, res);
