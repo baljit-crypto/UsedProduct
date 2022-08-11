@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-
+const {validateToken} = require("../jwt")
 const ctrlProduct = require("../controllers/product");
 
 router
@@ -18,5 +18,12 @@ router
 router
 .route('/product/:productid/available')
 .put(ctrlProduct.updateProductAvailability)
+
+router
+.route('/myitems')
+.get(validateToken, ctrlProduct.getMyItems)
+router
+.route('/pops')
+.get(validateToken, ctrlProduct.getPopProductList)
 
 module.exports = router;
