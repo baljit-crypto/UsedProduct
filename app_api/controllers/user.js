@@ -9,21 +9,22 @@ const {createToken} = require("../jwt")
 
 const signinUser =async function(req,res){
     const {email,password} = req.body
-    const User = await user.findOne({where: {email: email}})
+    const User = await user.findOne({ email: email })
     if(!User) res.status(400).json({error:"User doesn't exist"})
     const dbPassword = User.password
     brcypt.compare(password,dbPassword).then((match) => {
-        if(match === true){
+        if(match){
+            const accessToken = createToken(User)
+            res.status(200).json({ 
+                _id: User._id,
+                username: User.username,
+                email: User.email,
+                phone: User.phone,
+                accessToken: accessToken
+            })
+        }else{
             res.status(400)
             .json({error:"wrong username and password combinations"})
-        }else{
-            const access_token = createToken(User)
-            res.cookie("access-token",access_token,{
-                maxAge: 60*60*24*30*1000,
-                httpOnly: true
-            })
-            res.status(200).json(User)
-
         }
     })
    
@@ -31,30 +32,32 @@ const signinUser =async function(req,res){
 
 const createUser = function(req,res){
     const {username,email,phone,password} = req.body
-    // brcypt.hash(password,10).then((hash) => {
-        brcypt.genSalt(10,function(err,salt){
-            brcypt.hash(password,salt,function(err,hash){
-                user.create({username: username,
-                    email: email,
-                    phone: phone,
-                    password: hash},(err,data) => {
-                    if(err){
-                        res
-                        .status(404)
-                        .json(err)
-                      return;  
-                    }
-                    else{
+    brcypt.genSalt(10,function(err,salt){
+        brcypt.hash(password,salt,function(err,hash){
+            user.create({username: username,
+                email: email,
+                phone: phone,
+                password: hash},(err,data) => {
+                if(err){
                     res
-                    .status(200)
-                    .json(data)
-                    }
-                
-              })
+                    .status(404)
+                    .json(err)
+                    return;  
+                } 
+                else{
+                    const accessToken = createToken(data)
+                    res.status(200).json({ 
+                        _id: data._id,
+                        username: data.username,
+                        email: data.email,
+                        phone: data.phone,
+                        accessToken: accessToken
+                    })
+                }
             })
         })
+    })
        
-    // })
 
 };
 

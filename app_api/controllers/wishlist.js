@@ -1,10 +1,23 @@
 const mongoose = require('mongoose')
 const  wishlist = mongoose.model('wishlist')
 
+const getWishlist = function(req,res){
+    wishlist.find({ user_id: req.user_id }).exec(function(err,data){
+        if(err){
+            res
+            .status(404)
+            .json(err)
+          return;  
+        }
+        res
+        .status(200)
+        .json(data)
+    });
+};
 
 const createWishlist = function(req,res){
-    const {wish_product,createdAt,user_id,product_id} = req.body 
-                wishlist.create({wish_product: wish_product,
+    const {createdAt,user_id,product_id} = req.body 
+                wishlist.create({
                     createdAt: createdAt,
                     user_id: user_id,
                     product_id: product_id},(err,data) => {
@@ -24,10 +37,11 @@ const createWishlist = function(req,res){
 
 
 const deleteWishlist = function(req,res){
-    const wishlistid = req.params.wishlistid;
-    if(wishlistid){
+    // const {user_id,product_id} = req.params 
+    const {user_id,product_id} = req.body 
+    if(user_id && product_id){
         wishlist
-        .findByIdAndRemove(wishlistid)
+        .findOneAndRemove({ user_id: user_id, product_id: product_id })
         .exec((err,data) => {
             if(err){
                 res
@@ -48,6 +62,7 @@ const deleteWishlist = function(req,res){
 
 
 module.exports = {
-   createWishlist,
-   deleteWishlist
+    getWishlist,
+    createWishlist,
+    deleteWishlist
 };
