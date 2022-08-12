@@ -1,17 +1,27 @@
 const mongoose = require('mongoose')
-const  wishlist = mongoose.model('wishlist')
+const wishlist = mongoose.model('wishlist')
+const Products = mongoose.model('products');
 
 const getWishlist = function(req,res){
-    wishlist.find({ user_id: req.user_id }).exec(function(err,data){
+    wishlist.find({ user_id: req.user_id }).exec(function(err,wished){
         if(err){
             res
             .status(404)
             .json(err)
           return;  
         }
-        res
-        .status(200)
-        .json(data)
+
+        const ids = wished.map(d => d.product_id);
+        Products.find({ '_id': { $in: ids} }).exec(function(err,products){
+            res
+            .status(200)
+            .json(products.map(product => {
+                return {
+                    ...product._doc,
+                    ...{ wishedAt: wished.filter(w => w.product_id.equals(product._id))[0].createdAt }
+                }
+            }))
+        });
     });
 };
 

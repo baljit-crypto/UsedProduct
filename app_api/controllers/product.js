@@ -8,7 +8,11 @@ var mime = require('mime');
 const { reject } = require('lodash');
 
 const getProductList = function(req,res){
-    Products.find({ category: req.query.category }).exec(function(err,data){
+    limit = 50
+    if (req.query.limit){
+        limit = req.query.limit
+    }
+    Products.find({ category: req.query.category }).limit(limit).exec(function(err,data){
         if(err){
             res
             .status(404)
@@ -22,7 +26,7 @@ const getProductList = function(req,res){
 };
 
 const getPopProductList = function(req,res){
-    Wishlist.aggregate().sortByCount("product_id").exec(function(err,pops){
+    Wishlist.aggregate().sortByCount("product_id").limit(4).exec(function(err,pops){
         if(err){
             res
             .status(404)

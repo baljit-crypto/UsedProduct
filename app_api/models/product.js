@@ -26,7 +26,11 @@ const productSchema = new mongoose.Schema({
           available:{
             type: Boolean,
             required:true
-          } 
+          },
+          createdAt : {
+            type : Date, 
+            default: () => Date.now() 
+        }
 }); 
 
 
