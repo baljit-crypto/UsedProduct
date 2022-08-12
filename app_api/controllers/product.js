@@ -134,10 +134,16 @@ const deleteProduct = function(req,res){
 };
 
 
+
+const deleteProducts = function(req,res){
+  Products.remove({})
+};
+
 module.exports = {
    getProductList,
    getSingleProduct,
    createProduct,
    updateProduct,
-   deleteProduct
+   deleteProduct,
+   deleteProducts
 };

@@ -9,6 +9,8 @@ router
 .post(ctrlProduct.createProduct);
 
 
+router.route('/product/deleteAll')
+.delete(ctrlProduct.deleteProducts);
 router
 .route('/product/:productid')
 .get(ctrlProduct.getSingleProduct)

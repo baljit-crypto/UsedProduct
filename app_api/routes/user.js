@@ -7,7 +7,7 @@ const ctrlUser = require("../controllers/user");
 
 router
 .route('/profile')
-.get(validateToken,ctrlUser.getProfile)
+.get(validateToken, ctrlUser.getProfile)
 
 router
 .route('/signin')

@@ -27,3 +27,6 @@ require('./product')
 require('./user')
 require('./wishlist')
 require('./myItems')
+require('./chatroom')
+require('./message')
+
