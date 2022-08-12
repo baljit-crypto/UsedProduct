@@ -84,8 +84,39 @@ app.post('/api/product', function (req, res) {
 
 app.use('/api',productRouter)   // Should be after the `app.post('/api/product',  .... `
 
-app.listen(port,() =>{
+app = app.listen(port,() =>{
         console.log(`listening to port ${port}`)
 })
+
+
+/* Websocket*/
+const { WebSocketServer } = require('ws');
+const WebSocket = require('ws');
+const wss = new WebSocketServer({ server: app });
+
+wss.on('connection', function (ws) {
+  ws.on('message', function message(data, isBinary) {
+    const json = JSON.parse(data);
+    if (json.type == 'init'){
+        // console.log("initt____roomId", json.roomId);
+        ws.roomId = json.roomId;
+    }
+    wss.clients.forEach(function each(client) {
+        // console.log("clientclientroomId", client.roomId);
+      if (client.readyState === WebSocket.OPEN && client.roomId == json.roomId) {
+        client.send(data, { binary: isBinary });
+      }
+    });
+  });
+
+
+  ws.on('close', function () {
+    console.log('stopping client interval');
+    // clearInterval(id);
+  });
+});
+/* End of Websocket ----- */
+
+
 
 module.exports = app;
