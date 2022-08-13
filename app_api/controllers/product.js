@@ -163,6 +163,7 @@ const createProduct = function(req,res){
                 };
             }),
             description:req.body.description,
+            userId: req.user_id,
             seller:req.body.seller,
             available:req.body.available
         },(err,data) => {

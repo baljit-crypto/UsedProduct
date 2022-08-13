@@ -24,10 +24,12 @@ var productRouter = require('./app_api/routes/product')
 var userRouter = require('./app_api/routes/user')
 var wishlistRouter = require('./app_api/routes/wishlist')
 var myproductRouter = require('./app_api/routes/myItems')
+var messageRouter = require('./app_api/routes/message')
 
 app.use('/api',userRouter)
 app.use('/api',wishlistRouter)
 app.use('/api',myproductRouter)
+app.use('/api',messageRouter)
 
 /* Image upload  */
 // const multer  = require('multer')
@@ -102,7 +104,6 @@ wss.on('connection', function (ws) {
         ws.roomId = json.roomId;
     }
     wss.clients.forEach(function each(client) {
-        // console.log("clientclientroomId", client.roomId);
       if (client.readyState === WebSocket.OPEN && client.roomId == json.roomId) {
         client.send(data, { binary: isBinary });
       }

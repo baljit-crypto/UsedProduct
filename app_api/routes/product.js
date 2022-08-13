@@ -6,7 +6,7 @@ const ctrlProduct = require("../controllers/product");
 router
 .route('/product')
 .get(ctrlProduct.getProductList)
-.post(ctrlProduct.createProduct);
+.post(validateToken, ctrlProduct.createProduct);
 
 
 router
