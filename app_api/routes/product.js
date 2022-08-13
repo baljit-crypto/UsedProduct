@@ -22,8 +22,9 @@ router
 router
 .route('/myitems')
 .get(validateToken, ctrlProduct.getMyItems)
+
 router
 .route('/pops')
-.get(validateToken, ctrlProduct.getPopProductList)
+.get(ctrlProduct.getPopProductList)
 
 module.exports = router;

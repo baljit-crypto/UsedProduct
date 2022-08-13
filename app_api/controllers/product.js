@@ -26,16 +26,15 @@ const getProductList = function(req,res){
 };
 
 const getPopProductList = function(req,res){
-    Wishlist.aggregate().sortByCount("product_id").limit(4).exec(function(err,pops){
+    Wishlist.aggregate().sortByCount("product_id").limit(10).exec(function(err,pops){
         if(err){
             res
             .status(404)
             .json(err)
           return;  
         }
-        
-        const ids = pops.map(d => d._id).slice(0, 4);
-        Products.find({ '_id': { $in: ids} }).exec(function(err,data){
+        const ids = pops.map(d => d._id);
+        Products.find({ '_id': { $in: ids} }).limit(4).exec(function(err,data){
             if(err){
                 res
                 .status(404)
