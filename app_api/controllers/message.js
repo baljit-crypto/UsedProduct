@@ -4,20 +4,6 @@ const Message = mongoose.model('message')
 const User = mongoose.model('user')
 
 const getChatroomList = function(req,res){
-    console.log("getChatroomListgetChatroomList");
-    // Chatroom.findByIdAndRemove('62f7ed7bc1109bdd08164a64').exec((err,data) => {
-    //     if(err){
-    //         res
-    //         .status(404)
-    //         .json(err)
-    //       return;  
-    //     }
-    //     res
-    //     .status(204)
-    //     .json(null);
-    //     return
-    // });
-
     Chatroom.find().exec(function(err,data){
         if(err){
             res
@@ -42,6 +28,10 @@ const getMessageList = async function(req,res){
             userA = await User.findById(req.params.userId);
             userB = await User.findById(req.user_id);
         }
+
+        const nouse = userA._id;
+        const nouse2 = userB._id;
+
     }catch (err) {
         // no user id
         res
@@ -137,9 +127,33 @@ const createMessage = function(req,res){
 };
 
 
+const deleteRoom = function(req,res){
+    const roomId = req.params.roomId;
+    if(roomId){
+        Chatroom
+        .findByIdAndRemove(roomId)
+        .exec((err,data) => {
+            if(err){
+                res
+                .status(404)
+                .json(err)
+              return;  
+            }
+            res
+            .status(204)
+            .json(null);
+        });
+    } else{
+        res
+        .status(404)
+        .json({"message":"No roomId"});
+    }
+};
+
 
 module.exports = {
    getChatroomList,
+   deleteRoom,
    getMessageList,
    createMessage
 };

@@ -15,6 +15,7 @@ router
 router
 .route('/chatrooms/:roomId')
 .post(validateToken, ctrlMessage.createMessage)
+.delete(ctrlMessage.deleteRoom)
 
 
 module.exports = router;
