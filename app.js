@@ -5,6 +5,10 @@ const cookieParser = require('cookie-parser')
 var app = express()
 var path = require('path');
 var mime = require('mime');
+var logger = require("morgan");
+var http = require('http')
+var socket = require("socket.io")
+
 require('dotenv').config()
 var port = process.env.PORT || 5000
 
@@ -16,6 +20,8 @@ var port = process.env.PORT || 5000
 
 app.use(express.json())
 app.use(cookieParser())
+app.use(logger("dev"));
+
 app.use(express.static(path.join(__dirname, 'uploads')));
 
 require('./app_api/models/db')
@@ -25,10 +31,12 @@ var productRouter = require('./app_api/routes/product')
 var userRouter = require('./app_api/routes/user')
 var wishlistRouter = require('./app_api/routes/wishlist')
 var myproductRouter = require('./app_api/routes/myItems')
+var messageRouter = require('./app_api/routes/message')
 
 app.use('/api',userRouter)
 app.use('/api',wishlistRouter)
 app.use('/api',myproductRouter)
+app.use('/api',messageRouter)
 
 /* Image upload  */
 const multer  = require('multer')
@@ -59,8 +67,36 @@ app.post('/api/product', function (req, res) {
 
 app.use('/api',productRouter)   // Should be after the `app.post('/api/product',  .... `
 
-app.listen(port,() =>{
-        console.log(`listening to port ${port}`)
+
+const server = app.listen(port, () => {
+        console.log(`Server Started on Port ${port}`)
 })
+// const  server = http.createServer(app)
+// global.io = new Server(server)
+const io = socket(server, {
+        cors: {
+                origin:port,
+                credentials: true
+        }
+})
+
+
+global.onlineUsers = new Map()
+
+io.on("connection", (socket) => {
+        global.chatSocket = socket
+        socket.on("add-user",(userId) => {
+                onlineUsers.set(userId, socket.id)
+        })
+
+        socket.on("send-msg", (data) => {
+                const sendUserSocket = onlineUsers.get(data.to)
+                if(sendUserSocket){
+                        socket.to(sendUserSocket).emit("msg-recieve",data.msg)
+                }
+        })
+})
+
+
 
 module.exports = app;
