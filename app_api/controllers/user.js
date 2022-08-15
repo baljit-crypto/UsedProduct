@@ -10,7 +10,11 @@ const {createToken} = require("../jwt")
 const signinUser =async function(req,res){
     const {email,password} = req.body
     const User = await user.findOne({ email: email })
-    if(!User) res.status(400).json({error:"User doesn't exist"})
+    if(!User) {
+        console.log("user doesn't exis");
+        res.status(400).json({error:"User doesn't exist"});
+        return;
+    }
     const dbPassword = User.password
     brcypt.compare(password,dbPassword).then((match) => {
         if(match){

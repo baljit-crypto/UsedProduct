@@ -2,8 +2,55 @@ const mongoose = require('mongoose');
 const Products = mongoose.model('products');
 const Wishlist = mongoose.model('wishlist')
 
+const aws = require('aws-sdk');
+const fs = require('fs');
+var mime = require('mime');
+const { reject } = require('lodash');
+
 const getProductList = function(req,res){
-    Products.find({ category: req.query.category }).exec(function(err,data){
+    limit = 50
+    if (req.query.limit){
+        limit = req.query.limit
+    }
+    Products.find({ category: req.query.category }).limit(limit).exec(function(err,data){
+        if(err){
+            res
+            .status(404)
+            .json(err)
+          return;  
+        }
+        res
+        .status(200)
+        .json(data)
+    });
+};
+
+const getPopProductList = function(req,res){
+    Wishlist.aggregate().sortByCount("product_id").limit(10).exec(function(err,pops){
+        if(err){
+            res
+            .status(404)
+            .json(err)
+          return;  
+        }
+        const ids = pops.map(d => d._id);
+        Products.find({ '_id': { $in: ids} }).limit(4).exec(function(err,data){
+            if(err){
+                res
+                .status(404)
+                .json(err)
+              return;  
+            }
+
+            res
+            .status(200)
+            .json(data)
+        });
+    });
+};
+
+const getMyItems = function(req,res){
+    Products.find({ seller: req.username }).exec(function(err,data){
         if(err){
             res
             .status(404)
@@ -64,33 +111,92 @@ const getSingleProduct = function(req,res){
     });
 }
 
+const s3upload = (f, resolve, reject) => {
+    const s3 = new aws.S3();
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    // mime.getExtension(file.mimetype)
+    var params = {
+        ACL: 'public-read',
+        Bucket: process.env.S3_BUCKET,
+        Body: fs.createReadStream(f.path),
+        Key: `image/${uniqueSuffix}${f.originalname}`,
+        ContentType: f.mimetype
+      };
+  
+      s3.upload(params, (err, data) => {
+        if (err) {
+          console.log('Error occured while trying to upload to S3 bucket', err);
+          reject(err)
+        }
+  
+        if (data) {
+          fs.unlinkSync(f.path); // Empty temp folder
+          const imageUrl = data.Location;
+          resolve({ src: imageUrl })
+        }
+      });
+}
+
 const createProduct = function(req,res){
-  Products.create({
-        name:req.body.name,
-        category:req.body.category,
-        price:req.body.price,
-        images: req.files.images.map(f => ({ src: f.filename })),
-        description:req.body.description,
-        seller:req.body.seller,
-        available:req.body.available
-    },(err,data) => {
-    if(err){
+    aws.config.setPromisesDependency();
+    aws.config.update({
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: 'us-west-1'
+    });
+    const uploaders = req.files.images.map(f => {
+        return new Promise((resolve, reject) => {
+            s3upload(f, resolve, reject);
+        });
+      })
+  
+      Promise.all(uploaders).then((resolves) => {
+        const imageUrls = resolves.map(r => r.src)
+        Products.create({
+            name:req.body.name,
+            category:req.body.category,
+            price:req.body.price,
+            images: imageUrls.map(url => {
+                return {
+                    src: url
+                };
+            }),
+            description:req.body.description,
+            userId: req.body.userId,
+            seller:req.body.seller,
+            available:req.body.available
+        },(err,data) => {
         if(err){
-            res
-            .status(404)
-            .json(err)
-          return;  
-        } else{
+            if(err){
+                res
+                .status(404)
+                .json(err)
+              return;  
+            } else{
+                res
+                .status(200)
+                .json(data)
+                }
+        } else {
             res
             .status(200)
             .json(data)
             }
-    } else {
+      })
+
+
+
+      }).catch(err => {
         res
-        .status(200)
-        .json(data)
-        }
-  })
+        .status(500)
+        .json({error: err})
+      });
+
+
+
+        
+
+    
 };
 
 const updateProduct = function(req,res){ 
@@ -207,5 +313,7 @@ module.exports = {
    createProduct,
    updateProduct,
    updateProductAvailability,
-   deleteProduct
+   deleteProduct,
+   getMyItems,
+   getPopProductList
 };
